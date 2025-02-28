@@ -1,0 +1,41 @@
+name: Trigger Testing Repository Workflow
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Choose the environment: local, staging, or production'
+        required: true
+        default: staging
+        type: choice
+        options:
+          - local
+          - staging
+          - production
+      tag:
+        description: 'Optional tag to filter tests. Leave empty to run all tests.'
+        required: false
+        default: ''
+      ALLURE_JOB_RUN_ID:
+        description: 'ALLURE_JOB_RUN_ID service parameter'
+        required: false
+        default: ''
+
+jobs:
+  trigger-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Testing Repository Workflow
+        run: |
+          curl -X POST \
+            -H "Accept: application/vnd.github.v3+json" \
+            -H "Authorization: token ${{ secrets.TESTING_REPO }}" \
+            https://api.github.com/repos/OMOLEBILL/playground/actions/workflows/144886854/dispatches \
+            -d '{
+              "ref": "main",
+              "inputs": {
+                "environment": "'${{ github.event.inputs.environment }}'",
+                "tag": "'${{ github.event.inputs.tag }}'",
+                "ALLURE_JOB_RUN_ID": "'${{ github.event.inputs.ALLURE_JOB_RUN_ID }}'"
+              }
+            }'
